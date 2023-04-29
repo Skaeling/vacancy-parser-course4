@@ -47,7 +47,9 @@ class Vacancy:
         if self.salary_max:
             self.salary_max = f" до {self.salary_max}"
         else:
-            self.salary_to = ""
+            self.salary_max = ""
+        if self.salary_max == "" and self.salary_min == "":
+            self.currency = "Зарплата не указана"
 
         msg = f"{self.employer}:  {self.name}\n" \
               f"URL вакансии: {self.url} \n" \
@@ -73,10 +75,13 @@ class JSONSaver:
         return self.__filename
 
     def add_vacancies(self, data):
+        """Создает файл JSON с вакансиями"""
         with open(self.__filename, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
     def select(self):
+        """Выбирает из json файла вакансии в зависимости от заданной пользователем платформы,
+        создает экземпляры класса Vacancy"""
         with open(self.__filename, 'r', encoding='utf-8') as f:
             data = json.load(f)
         vacancies = []
@@ -85,7 +90,7 @@ class JSONSaver:
             for row in data:
                 if row['salary']:
                     salary_min, salary_max, currency = row['salary']['from'], row['salary']['to'], row['salary'][
-                        'currency']  # добавить условие про рубли и перевод
+                        'currency']
                 vacancies.append(Vacancy(row['name'], salary_min, salary_max, currency, row['employer']['name'],
                                          row['alternate_url']))
             return vacancies
@@ -94,7 +99,7 @@ class JSONSaver:
             for row in data:
                 if row['currency']:
                     salary_min, salary_max, currency = row['payment_from'], row['payment_to'], row[
-                        'currency']  # добавить условие про рубли и перевод
+                        'currency']
                 vacancies.append(
                     Vacancy(row['profession'], salary_min, salary_max, currency, row['firm_name'], row['link']))
             return vacancies
